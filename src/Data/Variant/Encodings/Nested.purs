@@ -12,7 +12,15 @@ import Data.Variant.Internal (VariantRep(..))
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
+--------------------------------------------------------------------------------
+--- Types
+--------------------------------------------------------------------------------
+
 foreign import data VariantEncNested :: Symbol -> Symbol -> Row Type -> Type
+
+--------------------------------------------------------------------------------
+--- API
+--------------------------------------------------------------------------------
 
 toVariant
   :: forall symTag symVal r

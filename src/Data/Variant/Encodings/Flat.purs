@@ -17,7 +17,15 @@ import Prim.RowList as RL
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
+--------------------------------------------------------------------------------
+--- Types
+--------------------------------------------------------------------------------
+
 foreign import data VariantEncFlat :: Symbol -> Row (Row Type) -> Type
+
+--------------------------------------------------------------------------------
+--- API
+--------------------------------------------------------------------------------
 
 toVariant
   :: forall symTag r r'
@@ -48,14 +56,18 @@ fromVariant v =
 
   prxSymTag = Proxy :: _ symTag
 
--- ---
+--------------------------------------------------------------------------------
+--- CheckCases
+--------------------------------------------------------------------------------
 
 class CheckCases :: Symbol -> Row (Row Type) -> Row Type -> Constraint
 class CheckCases symTag r1 r2 | symTag r1 -> r2
 
 instance (RowToList r1 rl1, CheckCasesRL symTag rl1 r2) => CheckCases symTag r1 r2
 
----
+--------------------------------------------------------------------------------
+--- CheckCasesRL
+--------------------------------------------------------------------------------
 
 class CheckCasesRL :: Symbol -> RowList (Row Type) -> Row Type -> Constraint
 class CheckCasesRL symTag rl1 r2 | symTag rl1 -> r2
@@ -69,7 +81,9 @@ instance
   ) =>
   CheckCasesRL symTag (RL.Cons sym r rl) r2
 
----
+--------------------------------------------------------------------------------
+--- FFI
+--------------------------------------------------------------------------------
 
 foreign import unsafeGet :: forall a b. String -> a -> b
 
