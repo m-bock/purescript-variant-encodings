@@ -24,7 +24,10 @@ On the JS side you have the following flat encoded tagged union types:
 
 ```js
 export const valSamples = [
-  { kind: "loading", progress: 99, id: "abc" },
+  { kind: "loading", progress: 0, id: "abc" },
+  { kind: "loading", progress: 20, id: "abc" },
+  { kind: "loading", progress: 71, id: "abc" },
+  { kind: "loading", progress: 98, id: "abc" },
   { kind: "success", result: "xyz" },
 ];
 ```
