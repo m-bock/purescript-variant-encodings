@@ -8,4 +8,41 @@ This library provides types that describe variants with custom encodings: Tag
 and value keys can be configured. Also a flat encoding is available.
 
 The types are merely meant as an intermediate step. There will be no utility
-functions provided. However, there are functions provided that convert to and from `Variant`.
+functions provided. However, there are functions available that convert to and from `Variant`.
+
+## Example
+
+On the JS side you have the following flat encoded tagged union types:
+
+```js
+export const valSamples = [
+  { kind: "loading", progress: 99, id: "abc" },
+  { kind: "success", result: "xyz" },
+];
+```
+
+On the PureScript side you can FFI it like so:
+
+```hs
+import Data.Variant.Encodings.Flat as VF
+
+type SampleVarEnc =
+  VF.VariantEncFlat "kind"
+    ( loading :: ( progress :: Int, id :: String )
+    , success :: ( result :: String )
+    )
+
+foreign import valSamples :: Array SampleVarEnc
+```
+
+And then convert it into a more usable Variant type:
+
+```hs
+type SampleVar = Variant
+  ( loading :: { progress :: Int, id :: String }
+  , success :: { result :: String }
+  )
+
+valSamplesVariant :: Array SampleVar
+valSamplesVariant = map VF.toVariant valSamples
+```

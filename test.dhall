@@ -1,12 +1,12 @@
 { name = "variant-encodings-test"
 , dependencies =
-  (./spago.dhall).dependencies # 
-  [ "console"
+  [ "aff"
   , "effect"
   , "prelude"
   , "spec"
   , "spec-discovery"
-  , "aff"
+  , "unsafe-coerce"
+  , "variant"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

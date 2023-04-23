@@ -3,7 +3,9 @@ module Data.Variant.Encodings.Flat
   , class CheckCases
   , class CheckCasesRL
   , fromVariant
+  , fromVariant'
   , toVariant
+  , toVariant'
   ) where
 
 import Prelude
@@ -28,11 +30,11 @@ foreign import data VariantEncFlat :: Symbol -> Row (Row Type) -> Type
 --------------------------------------------------------------------------------
 
 toVariant
-  :: forall symTag r r'
-   . CheckCases symTag r r'
+  :: forall symTag rowVarEnc rowVar
+   . CheckCases symTag rowVarEnc rowVar
   => IsSymbol symTag
-  => VariantEncFlat symTag r
-  -> Variant r'
+  => VariantEncFlat symTag rowVarEnc
+  -> Variant rowVar
 toVariant rec = unsafeCoerce rep
   where
   rep = VariantRep
@@ -41,13 +43,22 @@ toVariant rec = unsafeCoerce rep
     }
   prxSymTag = Proxy :: _ symTag
 
-fromVariant
-  :: forall symTag r r'
-   . CheckCases symTag r r'
+toVariant'
+  :: forall symTag rowVarEnc rowVar
+   . CheckCases symTag rowVarEnc rowVar
   => IsSymbol symTag
-  => Variant r'
-  -> VariantEncFlat symTag r
-fromVariant v =
+  => Proxy (VariantEncFlat symTag rowVarEnc)
+  -> Proxy (Variant rowVar)
+toVariant' _ = Proxy
+
+fromVariant
+  :: forall symTag rowVarEnc rowVar
+   . CheckCases symTag rowVarEnc rowVar
+  => IsSymbol symTag
+  => Proxy symTag
+  -> Variant rowVar
+  -> VariantEncFlat symTag rowVarEnc
+fromVariant _ v =
   rep.value
     # unsafeInsert (reflectSymbol prxSymTag) rep.type
 
@@ -56,30 +67,43 @@ fromVariant v =
 
   prxSymTag = Proxy :: _ symTag
 
+fromVariant'
+  :: forall symTag rowVarEnc rowVar
+   . CheckCases symTag rowVarEnc rowVar
+  => IsSymbol symTag
+  => Proxy symTag
+  -> Proxy (Variant rowVar)
+  -> Proxy (VariantEncFlat symTag rowVarEnc)
+fromVariant' _ _ = Proxy
+
 --------------------------------------------------------------------------------
 --- CheckCases
 --------------------------------------------------------------------------------
 
 class CheckCases :: Symbol -> Row (Row Type) -> Row Type -> Constraint
-class CheckCases symTag r1 r2 | symTag r1 -> r2
+class CheckCases symTag rowVarEnc rowVar | symTag rowVar -> rowVarEnc
 
-instance (RowToList r1 rl1, CheckCasesRL symTag rl1 r2) => CheckCases symTag r1 r2
+instance
+  ( RowToList rowVar rlVar
+  , CheckCasesRL symTag rlVar rowVarEnc
+  ) =>
+  CheckCases symTag rowVarEnc rowVar
 
 --------------------------------------------------------------------------------
 --- CheckCasesRL
 --------------------------------------------------------------------------------
 
-class CheckCasesRL :: Symbol -> RowList (Row Type) -> Row Type -> Constraint
-class CheckCasesRL symTag rl1 r2 | symTag rl1 -> r2
+class CheckCasesRL :: Symbol -> RowList Type -> Row (Row Type) -> Constraint
+class CheckCasesRL symTag rlVar rowVarEnc | symTag rlVar -> rowVarEnc
 
 instance CheckCasesRL symTag RL.Nil ()
 
 instance
-  ( Row.Cons sym (Record r) r2' r2
-  , Row.Lacks symTag r2
-  , CheckCasesRL symTag rl r2'
+  ( Row.Cons sym r rowVarEncPrev rowVarEnc
+  , Row.Lacks symTag rowVarEnc
+  , CheckCasesRL symTag rlVar rowVarEncPrev
   ) =>
-  CheckCasesRL symTag (RL.Cons sym r rl) r2
+  CheckCasesRL symTag (RL.Cons sym (Record r) rlVar) rowVarEnc
 
 --------------------------------------------------------------------------------
 --- FFI

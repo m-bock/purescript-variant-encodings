@@ -1,7 +1,9 @@
 module Data.Variant.Encodings.Nested
   ( VariantEncNested
   , fromVariant
+  , fromVariant'
   , toVariant
+  , toVariant'
   ) where
 
 import Prelude
@@ -37,13 +39,21 @@ toVariant rec = unsafeCoerce rep
   prxSymTag = Proxy :: _ symTag
   prxSymVal = Proxy :: _ symVal
 
+toVariant'
+  :: forall symTag symVal r
+   . Proxy (VariantEncNested symTag symVal r)
+  -> Proxy (Variant r)
+toVariant' _ = Proxy
+
 fromVariant
   :: forall symTag symVal r
    . IsSymbol symTag
   => IsSymbol symVal
-  => Variant r
+  => Proxy symTag
+  -> Proxy symVal
+  -> Variant r
   -> VariantEncNested symTag symVal r
-fromVariant v =
+fromVariant _ _ v =
   {}
     # unsafeInsert (reflectSymbol prxSymTag) rep.type
     # unsafeInsert (reflectSymbol prxSymVal) rep.value
@@ -52,6 +62,14 @@ fromVariant v =
 
   prxSymTag = Proxy :: _ symTag
   prxSymVal = Proxy :: _ symVal
+
+fromVariant'
+  :: forall symTag symVal r
+   . Proxy symTag
+  -> Proxy symVal
+  -> Proxy (Variant r)
+  -> Proxy (VariantEncNested symTag symVal r)
+fromVariant' _ _ _ = Proxy
 
 --------------------------------------------------------------------------------
 --- FFI
