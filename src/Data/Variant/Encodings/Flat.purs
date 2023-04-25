@@ -46,7 +46,6 @@ toVariant rec = unsafeCoerce rep
 toVariant'
   :: forall symTag rowVarEnc rowVar
    . CheckCases symTag rowVarEnc rowVar
-  => IsSymbol symTag
   => Proxy (VariantEncFlat symTag rowVarEnc)
   -> Proxy (Variant rowVar)
 toVariant' _ = Proxy
@@ -70,7 +69,6 @@ fromVariant _ v =
 fromVariant'
   :: forall symTag rowVarEnc rowVar
    . CheckCases symTag rowVarEnc rowVar
-  => IsSymbol symTag
   => Proxy symTag
   -> Proxy (Variant rowVar)
   -> Proxy (VariantEncFlat symTag rowVarEnc)
@@ -100,7 +98,6 @@ instance CheckCasesRL symTag RL.Nil ()
 
 instance
   ( Row.Cons sym r rowVarEncPrev rowVarEnc
-  , Row.Lacks symTag rowVarEnc
   , CheckCasesRL symTag rlVar rowVarEncPrev
   ) =>
   CheckCasesRL symTag (RL.Cons sym (Record r) rlVar) rowVarEnc
