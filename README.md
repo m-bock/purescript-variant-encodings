@@ -55,5 +55,5 @@ type SampleVar = Variant
   )
 
 valSamplesVariant :: Array SampleVar
-valSamplesVariant = map VF.toVariant valSamples
+valSamplesVariant = map VF.variantFromVariantEnc valSamples
 ```
