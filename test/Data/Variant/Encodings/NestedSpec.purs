@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Variant (Variant)
 import Data.Variant as V
-import Data.Variant.Encodings.Nested (VariantEncNested, fromVariant, toVariant)
+import Data.Variant.Encodings.Nested (VariantEncNested, variantFromVariantEnc, variantToVariantEnc)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Type.Proxy (Proxy(..))
@@ -37,19 +37,19 @@ spec =
           v1 :: RemoteDataVar
           v1 = V.inj (Proxy :: _ "loading") 99
 
-          v1' = fromVariant (Proxy :: _ "kind") (Proxy :: _ "payload") v1
+          v1' = variantToVariantEnc v1 :: VariantEncNested "kind" "payload" _
 
           v2 :: RemoteDataVar
           v2 = V.inj (Proxy :: _ "success") "a"
 
-          v2' = fromVariant (Proxy :: _ "kind") (Proxy :: _ "payload") v2
+          v2' = variantToVariantEnc v2 :: VariantEncNested "kind" "payload" _
 
           v3 :: RemoteDataVar
           v3 = V.inj (Proxy :: _ "failure") { error: "", errCode: 0 }
 
-          v3' = fromVariant (Proxy :: _ "kind") (Proxy :: _ "payload") v3
+          v3' = variantToVariantEnc v3 :: VariantEncNested "kind" "payload" _
 
-        toVariant v1' `shouldEqual` v1
-        toVariant v2' `shouldEqual` v2
-        toVariant v3' `shouldEqual` v3
+        variantFromVariantEnc v1' `shouldEqual` v1
+        variantFromVariantEnc v2' `shouldEqual` v2
+        variantFromVariantEnc v3' `shouldEqual` v3
 

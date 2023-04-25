@@ -1,9 +1,11 @@
 module Data.Variant.Encodings.Nested
   ( VariantEncNested
-  , fromVariant
-  , fromVariant'
-  , toVariant
-  , toVariant'
+  , variantFromVariantEnc
+  , variantToVariantEnc
+  , variantFromVariantEnc'
+  , variantToVariantEnc'
+  , class IsVariantEncNested
+
   ) where
 
 import Prelude
@@ -24,52 +26,46 @@ foreign import data VariantEncNested :: Symbol -> Symbol -> Row Type -> Type
 --- API
 --------------------------------------------------------------------------------
 
-toVariant
-  :: forall symTag symVal r
-   . IsSymbol symTag
-  => IsSymbol symVal
-  => VariantEncNested symTag symVal r
-  -> Variant r
-toVariant rec = unsafeCoerce rep
-  where
-  rep = VariantRep
-    { type: unsafeGet (reflectSymbol prxSymTag) rec
-    , value: unsafeGet (reflectSymbol prxSymVal) rec
-    }
-  prxSymTag = Proxy :: _ symTag
-  prxSymVal = Proxy :: _ symVal
+class IsVariantEncNested symTag symVal rowVarEnc rowVar | symTag symVal rowVar -> rowVarEnc where
+  variantToVariantEnc :: Variant rowVar -> VariantEncNested symTag symVal rowVarEnc
+  variantFromVariantEnc :: VariantEncNested symTag symVal rowVarEnc -> Variant rowVar
 
-toVariant'
+instance (IsSymbol symTag, IsSymbol symVal) => IsVariantEncNested symTag symVal rowVarEnc rowVar where
+
+  variantToVariantEnc v =
+    {}
+      # unsafeInsert (reflectSymbol prxSymTag) rep.type
+      # unsafeInsert (reflectSymbol prxSymVal) rep.value
+    where
+    VariantRep rep = unsafeCoerce v
+
+    prxSymTag = Proxy :: _ symTag
+    prxSymVal = Proxy :: _ symVal
+
+  variantFromVariantEnc rec = unsafeCoerce rep
+    where
+    rep = VariantRep
+      { type: unsafeGet (reflectSymbol prxSymTag) rec
+      , value: unsafeGet (reflectSymbol prxSymVal) rec
+      }
+    prxSymTag = Proxy :: _ symTag
+    prxSymVal = Proxy :: _ symVal
+
+--------------------------------------------------------------------------------
+--- Proxy API
+--------------------------------------------------------------------------------
+
+variantFromVariantEnc'
   :: forall symTag symVal r
    . Proxy (VariantEncNested symTag symVal r)
   -> Proxy (Variant r)
-toVariant' _ = Proxy
+variantFromVariantEnc' _ = Proxy
 
-fromVariant
+variantToVariantEnc'
   :: forall symTag symVal r
-   . IsSymbol symTag
-  => IsSymbol symVal
-  => Proxy symTag
-  -> Proxy symVal
-  -> Variant r
-  -> VariantEncNested symTag symVal r
-fromVariant _ _ v =
-  {}
-    # unsafeInsert (reflectSymbol prxSymTag) rep.type
-    # unsafeInsert (reflectSymbol prxSymVal) rep.value
-  where
-  VariantRep rep = unsafeCoerce v
-
-  prxSymTag = Proxy :: _ symTag
-  prxSymVal = Proxy :: _ symVal
-
-fromVariant'
-  :: forall symTag symVal r
-   . Proxy symTag
-  -> Proxy symVal
-  -> Proxy (Variant r)
+   . Proxy (Variant r)
   -> Proxy (VariantEncNested symTag symVal r)
-fromVariant' _ _ _ = Proxy
+variantToVariantEnc' _ = Proxy
 
 --------------------------------------------------------------------------------
 --- FFI
