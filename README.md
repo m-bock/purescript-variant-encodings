@@ -16,7 +16,7 @@ functions provided. However, there are functions available that convert to and f
 
 ## Installation
 
-_Not yet published on Pursuit. You need to add it manually as an extra dependency in `packages.dhall`._
+`spago install variant-encodings`
 
 ## Example
 
