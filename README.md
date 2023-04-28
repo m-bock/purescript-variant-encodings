@@ -16,7 +16,9 @@ functions provided. However, there are functions available that convert to and f
 
 ## Installation
 
-`spago install variant-encodings`
+```
+spago install variant-encodings
+```
 
 ## Example
 
