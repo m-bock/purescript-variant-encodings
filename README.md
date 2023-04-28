@@ -22,6 +22,8 @@ spago install variant-encodings
 
 ## Example
 
+### Flat encoding
+
 On the JS side you have the following flat encoded tagged union types:
 
 ```js
@@ -58,4 +60,44 @@ type SampleVar = Variant
 
 valSamplesVariant :: Array SampleVar
 valSamplesVariant = map VF.variantFromVariantEnc valSamples
+```
+
+### Nested encoding
+
+On the JS side you have the following nested encoded tagged union types:
+
+```js
+export const valSamples = [
+  { kind: "loading", payload: 0 },
+  { kind: "loading", payload: 20 },
+  { kind: "loading", payload: 71 },
+  { kind: "loading", payload: 98 } },
+  { kind: "success", payload: "done!" },
+];
+```
+
+On the PureScript side you can FFI it like so:
+
+```hs
+import Data.Variant.Encodings.Nested as VN
+
+type SampleVarEnc =
+  VN.VariantEncNested "kind" "payload"
+    ( loading :: Int
+    , success :: String
+    )
+
+foreign import valSamples :: Array SampleVarEnc
+```
+
+And then convert it into a more usable Variant type:
+
+```hs
+type SampleVar = Variant
+  ( loading :: Int
+  , success :: String
+  )
+
+valSamplesVariant :: Array SampleVar
+valSamplesVariant = map VN.variantFromVariantEnc valSamples
 ```
