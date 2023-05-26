@@ -11,12 +11,12 @@ import Type.Proxy (Proxy(..))
 
 type RemoteDataVarEnc =
   VariantEncFlat "kind"
-    ( loading :: (progress :: Int)
-    , success :: (result :: String)
+    ( loading :: { progress :: Int }
+    , success :: { result :: String }
     , failure ::
-        ( error :: String
+        { error :: String
         , errCode :: Int
-        )
+        }
     )
 
 type RemoteDataVar = Variant

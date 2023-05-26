@@ -24,7 +24,7 @@ import Unsafe.Coerce (unsafeCoerce)
 --- Types
 --------------------------------------------------------------------------------
 
-foreign import data VariantEncFlat :: Symbol -> Row (Row Type) -> Type
+foreign import data VariantEncFlat :: Symbol -> Row Type -> Type
 
 --------------------------------------------------------------------------------
 --- API
@@ -76,7 +76,7 @@ variantToVariantEnc' _ _ = Proxy
 --- CheckCases
 --------------------------------------------------------------------------------
 
-class CheckCases :: Symbol -> Row (Row Type) -> Row Type -> Constraint
+class CheckCases :: Symbol -> Row Type -> Row Type -> Constraint
 class CheckCases symTag rowVarEnc rowVar | symTag rowVar -> rowVarEnc
 
 instance
@@ -89,13 +89,13 @@ instance
 --- CheckCasesRL
 --------------------------------------------------------------------------------
 
-class CheckCasesRL :: Symbol -> RowList Type -> Row (Row Type) -> Constraint
+class CheckCasesRL :: Symbol -> RowList Type -> Row Type -> Constraint
 class CheckCasesRL symTag rlVar rowVarEnc | symTag rlVar -> rowVarEnc
 
 instance CheckCasesRL symTag RL.Nil ()
 
 instance
-  ( Row.Cons sym r rowVarEncPrev rowVarEnc
+  ( Row.Cons sym (Record r) rowVarEncPrev rowVarEnc
   , CheckCasesRL symTag rlVar rowVarEncPrev
   ) =>
   CheckCasesRL symTag (RL.Cons sym (Record r) rlVar) rowVarEnc
