@@ -43,8 +43,8 @@ import Data.Variant.Encodings.Flat as VF
 
 type SampleVarEnc =
   VF.VariantEncFlat "kind"
-    ( loading :: ( progress :: Int, id :: String )
-    , success :: ( result :: String )
+    ( loading :: { progress :: Int, id :: String }
+    , success :: { result :: String }
     )
 
 foreign import valSamples :: Array SampleVarEnc
