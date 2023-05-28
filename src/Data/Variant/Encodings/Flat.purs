@@ -3,11 +3,14 @@ module Data.Variant.Encodings.Flat
   , class CheckCases
   , class CheckCasesRL
   , class IsVariantEncFlat
-  , variantToVariantEnc
-  , variantToVariantEnc'
+  , class ToRecord
   , variantFromVariantEnc
   , variantFromVariantEnc'
-  ) where
+  , variantToVariantEnc
+  , variantToVariantEnc'
+  , toRecord
+  )
+  where
 
 import Prelude
 
@@ -95,10 +98,21 @@ class CheckCasesRL symTag rlVar rowVarEnc | symTag rlVar -> rowVarEnc
 instance CheckCasesRL symTag RL.Nil ()
 
 instance
-  ( Row.Cons sym (Record r) rowVarEncPrev rowVarEnc
+  ( Row.Cons sym a rowVarEncPrev rowVarEnc
+  , ToRecord a r
   , CheckCasesRL symTag rlVar rowVarEncPrev
   ) =>
-  CheckCasesRL symTag (RL.Cons sym (Record r) rlVar) rowVarEnc
+  CheckCasesRL symTag (RL.Cons sym a rlVar) rowVarEnc
+
+--------------------------------------------------------------------------------
+--- FFI
+--------------------------------------------------------------------------------
+
+class ToRecord a r | a -> r where
+  toRecord :: a -> Record r
+
+instance ToRecord (Record r) r where
+  toRecord = identity
 
 --------------------------------------------------------------------------------
 --- FFI
