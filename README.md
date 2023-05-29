@@ -39,10 +39,10 @@ export const valSamples = [
 On the PureScript side you can FFI it like so:
 
 ```hs
-import Data.Variant.Encodings.Flat as VF
+import Data.Variant.Encodings.Flat (normalizeEncodingFlat, VariantEncodedFlat)
 
 type SampleVarEnc =
-  VF.VariantEncFlat "kind"
+  VariantEncodedFlat "kind"
     ( loading :: { progress :: Int, id :: String }
     , success :: { result :: String }
     )
@@ -59,7 +59,7 @@ type SampleVar = Variant
   )
 
 valSamplesVariant :: Array SampleVar
-valSamplesVariant = map VF.variantFromVariantEnc valSamples
+valSamplesVariant = map normalizeEncodingFlat valSamples
 ```
 
 ### Nested encoding
@@ -79,10 +79,10 @@ export const valSamples = [
 On the PureScript side you can FFI it like so:
 
 ```hs
-import Data.Variant.Encodings.Nested as VN
+import Data.Variant.Encodings.Nested (VariantEncodedNested, normalizeEncodingNested)
 
 type SampleVarEnc =
-  VN.VariantEncNested "kind" "payload"
+  VariantEncodedNested "kind" "payload"
     ( loading :: Int
     , success :: String
     )
@@ -99,5 +99,5 @@ type SampleVar = Variant
   )
 
 valSamplesVariant :: Array SampleVar
-valSamplesVariant = map VN.variantFromVariantEnc valSamples
+valSamplesVariant = map normalizeEncodingNested valSamples
 ```

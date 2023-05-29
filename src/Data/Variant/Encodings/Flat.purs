@@ -1,13 +1,13 @@
 module Data.Variant.Encodings.Flat
-  ( VariantEncFlat
+  ( VariantEncodedFlat
   , class CheckCases
   , class CheckCasesRL
   , class IsRecordWithoutKey
-  , class IsVariantEncFlat
-  , variantFromVariantEnc
-  , variantFromVariantEnc'
-  , variantToVariantEnc
-  , variantToVariantEnc'
+  , class IsVariantEncodedFlat
+  , normalizeEncodingFlat
+  , normalizeEncodingFlat'
+  , customizeEncodingFlat
+  , customizeEncodingFlat'
   , isRecordWithoutKey
   ) where
 
@@ -26,19 +26,19 @@ import Unsafe.Coerce (unsafeCoerce)
 --- Types
 --------------------------------------------------------------------------------
 
-foreign import data VariantEncFlat :: Symbol -> Row Type -> Type
+foreign import data VariantEncodedFlat :: Symbol -> Row Type -> Type
 
 --------------------------------------------------------------------------------
 --- API
 --------------------------------------------------------------------------------
 
-class IsVariantEncFlat symTag rowVarEnc rowVar | symTag rowVar -> rowVarEnc where
-  variantToVariantEnc :: Variant rowVar -> VariantEncFlat symTag rowVarEnc
-  variantFromVariantEnc :: VariantEncFlat symTag rowVarEnc -> Variant rowVar
+class IsVariantEncodedFlat symTag rowVarEnc rowVar | symTag rowVar -> rowVarEnc where
+  customizeEncodingFlat :: Variant rowVar -> VariantEncodedFlat symTag rowVarEnc
+  normalizeEncodingFlat :: VariantEncodedFlat symTag rowVarEnc -> Variant rowVar
 
-instance (IsSymbol symTag, CheckCases symTag rowVarEnc rowVar) => IsVariantEncFlat symTag rowVarEnc rowVar where
+instance (IsSymbol symTag, CheckCases symTag rowVarEnc rowVar) => IsVariantEncodedFlat symTag rowVarEnc rowVar where
 
-  variantToVariantEnc v =
+  customizeEncodingFlat v =
     rep.value
       # unsafeInsert (reflectSymbol prxSymTag) rep.type
 
@@ -47,7 +47,7 @@ instance (IsSymbol symTag, CheckCases symTag rowVarEnc rowVar) => IsVariantEncFl
 
     prxSymTag = Proxy :: _ symTag
 
-  variantFromVariantEnc rec = unsafeCoerce rep
+  normalizeEncodingFlat rec = unsafeCoerce rep
     where
     rep = VariantRep
       { type: unsafeGet (reflectSymbol prxSymTag) rec
@@ -59,20 +59,20 @@ instance (IsSymbol symTag, CheckCases symTag rowVarEnc rowVar) => IsVariantEncFl
 --- Proxy API
 --------------------------------------------------------------------------------
 
-variantFromVariantEnc'
+normalizeEncodingFlat'
   :: forall symTag rowVarEnc rowVar
-   . IsVariantEncFlat symTag rowVarEnc rowVar
-  => Proxy (VariantEncFlat symTag rowVarEnc)
+   . IsVariantEncodedFlat symTag rowVarEnc rowVar
+  => Proxy (VariantEncodedFlat symTag rowVarEnc)
   -> Proxy (Variant rowVar)
-variantFromVariantEnc' _ = Proxy
+normalizeEncodingFlat' _ = Proxy
 
-variantToVariantEnc'
+customizeEncodingFlat'
   :: forall symTag rowVarEnc rowVar
-   . IsVariantEncFlat symTag rowVarEnc rowVar
+   . IsVariantEncodedFlat symTag rowVarEnc rowVar
   => Proxy symTag
   -> Proxy (Variant rowVar)
-  -> Proxy (VariantEncFlat symTag rowVarEnc)
-variantToVariantEnc' _ _ = Proxy
+  -> Proxy (VariantEncodedFlat symTag rowVarEnc)
+customizeEncodingFlat' _ _ = Proxy
 
 --------------------------------------------------------------------------------
 --- CheckCases

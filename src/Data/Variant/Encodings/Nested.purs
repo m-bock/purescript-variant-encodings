@@ -1,10 +1,10 @@
 module Data.Variant.Encodings.Nested
-  ( VariantEncNested
-  , variantFromVariantEnc
-  , variantToVariantEnc
-  , variantFromVariantEnc'
-  , variantToVariantEnc'
-  , class IsVariantEncNested
+  ( VariantEncodedNested
+  , normalizeEncodingNested
+  , customizeEncodingNested
+  , normalizeEncodingNested'
+  , customizeEncodingNested'
+  , class IsVariantEncodedNested
 
   ) where
 
@@ -20,19 +20,19 @@ import Unsafe.Coerce (unsafeCoerce)
 --- Types
 --------------------------------------------------------------------------------
 
-foreign import data VariantEncNested :: Symbol -> Symbol -> Row Type -> Type
+foreign import data VariantEncodedNested :: Symbol -> Symbol -> Row Type -> Type
 
 --------------------------------------------------------------------------------
 --- API
 --------------------------------------------------------------------------------
 
-class IsVariantEncNested symTag symVal rowVarEnc rowVar | symTag symVal rowVar -> rowVarEnc where
-  variantToVariantEnc :: Variant rowVar -> VariantEncNested symTag symVal rowVarEnc
-  variantFromVariantEnc :: VariantEncNested symTag symVal rowVarEnc -> Variant rowVar
+class IsVariantEncodedNested symTag symVal rowVarEnc rowVar | symTag symVal rowVar -> rowVarEnc where
+  customizeEncodingNested :: Variant rowVar -> VariantEncodedNested symTag symVal rowVarEnc
+  normalizeEncodingNested :: VariantEncodedNested symTag symVal rowVarEnc -> Variant rowVar
 
-instance (IsSymbol symTag, IsSymbol symVal) => IsVariantEncNested symTag symVal rowVarEnc rowVar where
+instance (IsSymbol symTag, IsSymbol symVal) => IsVariantEncodedNested symTag symVal rowVarEnc rowVar where
 
-  variantToVariantEnc v =
+  customizeEncodingNested v =
     {}
       # unsafeInsert (reflectSymbol prxSymTag) rep.type
       # unsafeInsert (reflectSymbol prxSymVal) rep.value
@@ -42,7 +42,7 @@ instance (IsSymbol symTag, IsSymbol symVal) => IsVariantEncNested symTag symVal 
     prxSymTag = Proxy :: _ symTag
     prxSymVal = Proxy :: _ symVal
 
-  variantFromVariantEnc rec = unsafeCoerce rep
+  normalizeEncodingNested rec = unsafeCoerce rep
     where
     rep = VariantRep
       { type: unsafeGet (reflectSymbol prxSymTag) rec
@@ -55,17 +55,17 @@ instance (IsSymbol symTag, IsSymbol symVal) => IsVariantEncNested symTag symVal 
 --- Proxy API
 --------------------------------------------------------------------------------
 
-variantFromVariantEnc'
+normalizeEncodingNested'
   :: forall symTag symVal r
-   . Proxy (VariantEncNested symTag symVal r)
+   . Proxy (VariantEncodedNested symTag symVal r)
   -> Proxy (Variant r)
-variantFromVariantEnc' _ = Proxy
+normalizeEncodingNested' _ = Proxy
 
-variantToVariantEnc'
+customizeEncodingNested'
   :: forall symTag symVal r
    . Proxy (Variant r)
-  -> Proxy (VariantEncNested symTag symVal r)
-variantToVariantEnc' _ = Proxy
+  -> Proxy (VariantEncodedNested symTag symVal r)
+customizeEncodingNested' _ = Proxy
 
 --------------------------------------------------------------------------------
 --- FFI
