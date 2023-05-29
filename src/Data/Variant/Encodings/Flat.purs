@@ -2,15 +2,14 @@ module Data.Variant.Encodings.Flat
   ( VariantEncFlat
   , class CheckCases
   , class CheckCasesRL
+  , class IsRecordWithoutKey
   , class IsVariantEncFlat
-  , class ToRecord
   , variantFromVariantEnc
   , variantFromVariantEnc'
   , variantToVariantEnc
   , variantToVariantEnc'
-  , toRecord
-  )
-  where
+  , isRecordWithoutKey
+  ) where
 
 import Prelude
 
@@ -99,20 +98,26 @@ instance CheckCasesRL symTag RL.Nil ()
 
 instance
   ( Row.Cons sym a rowVarEncPrev rowVarEnc
-  , ToRecord a r
+  , IsRecordWithoutKey symTag a
   , CheckCasesRL symTag rlVar rowVarEncPrev
   ) =>
   CheckCasesRL symTag (RL.Cons sym a rlVar) rowVarEnc
 
 --------------------------------------------------------------------------------
---- FFI
+--- IsRecordWithoutKey
 --------------------------------------------------------------------------------
 
-class ToRecord a r | a -> r where
-  toRecord :: a -> Record r
+class IsRecordWithoutKey :: forall k. Symbol -> k -> Constraint
+class
+  IsRecordWithoutKey sym r
+  where
+  isRecordWithoutKey :: Proxy sym -> Proxy r
 
-instance ToRecord (Record r) r where
-  toRecord = identity
+instance
+  ( Row.Lacks sym r
+  ) =>
+  IsRecordWithoutKey sym (Record r) where
+  isRecordWithoutKey _ = Proxy
 
 --------------------------------------------------------------------------------
 --- FFI
