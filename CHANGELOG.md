@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.0.0]
+
 ### Fixed
 
 - Disallow tag label in flat encoded values.
@@ -21,4 +23,5 @@
 - Initial implementation
 
 [unreleased]: https://github.com/thought2/purescript-ts-bridge/compare/v1.0.0...HEAD
+[2.0.0]: https://github.com/thought2/purescript-ts-bridge/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/thought2/purescript-ts-bridge/releases/tag/v1.0.0
